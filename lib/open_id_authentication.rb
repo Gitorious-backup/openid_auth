@@ -37,21 +37,6 @@ module OpenIdAuthentication
 
   self.store = nil
 
-  if Rails.version >= '3'
-    class Railtie < ::Rails::Railtie
-      config.app_middleware.use OpenIdAuthentication
-
-      config.after_initialize do
-        OpenID::Util.logger = Rails.logger
-      end
-
-      ActiveSupport.on_load :action_controller do
-        ActionController::Base.send :include, ControllerMethods
-        #ActionController::Base.extend ControllerMethods
-      end
-    end
-  end
-
   class Result
     ERROR_MESSAGES = {
       :missing      => "Sorry, the OpenID server couldn't be found",
@@ -142,5 +127,19 @@ module OpenIdAuthentication
           yield Result[:setup_needed], response.setup_url, nil
         end
       end
+  end
+
+  if Rails.version >= '3'
+    class Railtie < ::Rails::Railtie
+      config.app_middleware.use OpenIdAuthentication
+
+      config.after_initialize do
+        OpenID::Util.logger = Rails.logger
+      end
+
+      ActiveSupport.on_load :action_controller do
+        ActionController::Base.send :include, ::OpenIdAuthentication::ControllerMethods
+      end
+    end
   end
 end
